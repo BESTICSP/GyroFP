@@ -1,0 +1,276 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Demo</title>
+    <title>JavaScript gyro Demo</title>
+    <style>
+      #demo-div {color: lightgrey; border-radius: 0.3rem;}
+      #demo-div span, #demo-div #num-observed-events {color: black;}
+      h1 {margin-top: 0.5rem;}
+      h4 {margin-top: 0.66rem; font-size:1.33rem;}
+      #demo-div li {line-height: 21px;}
+      #demo-div ul {margin-bottom: 0.66rem;}
+    </style>
+</head>
+<body>
+<main role="main" class="container">
+
+<h1 align="left">JavaScript gyro Demo</h1>
+
+<div class="p-3 mb-2 bg-secondary" id="demo-div">
+<a id="start_demo" class="btn btn-lg btn-success py-1" href="#" role="button">Start the demo</a>
+<p style="margin-top:1rem;">Num. of datapoints: <span class="badge badge-warning" id="num-observed-events">0</span></p>
+
+
+<h4 style="margin-top:0.75rem;">Orientation</h4>
+<ul>
+  <li>X-axis (&beta;): <span id="Orientation_b">0</span><span>&deg;</span></li>
+  <li>Y-axis (&gamma;): <span id="Orientation_g">0</span><span>&deg;</span></li>
+  <li>Z-axis (&alpha;): <span id="Orientation_a">0</span><span>&deg;</span></li>
+</ul>
+
+<h4>Accelerometer</h4>
+<ul>
+  <li>X-axis: <span id="Accelerometer_x">0</span><span> m/s<sup>2</sup></span></li>
+  <li>Y-axis: <span id="Accelerometer_y">0</span><span> m/s<sup>2</sup></span></li>
+  <li>Z-axis: <span id="Accelerometer_z">0</span><span> m/s<sup>2</sup></span></li>
+  <li>Data Interval: <span id="Accelerometer_i">0</span><span> ms</span></li>
+</ul>
+
+<h4>Accelerometer including gravity</h4>
+
+<ul>
+  <li>X-axis: <span id="Accelerometer_gx">0</span><span> m/s<sup>2</sup></span></li>
+  <li>Y-axis: <span id="Accelerometer_gy">0</span><span> m/s<sup>2</sup></span></li>
+  <li>Z-axis: <span id="Accelerometer_gz">0</span><span> m/s<sup>2</sup></span></li>
+</ul>
+
+<h4>Gyroscope</h4>
+<ul>
+  <li>X-axis: <span id="Gyroscope_x">0</span><span>&deg;/s</span></li>
+  <li>Y-axis: <span id="Gyroscope_y">0</span><span>&deg;/s</span></li>
+  <li>Z-axis: <span id="Gyroscope_z">0</span><span>&deg;/s</span></li>
+</ul>
+
+<h4>GetPeakAmplitude</h4>
+<ul>
+  <li>GyroscopeX-axis: <span id="AGyroscope_x">0</span><span>&deg;/s</span></li>
+  <li>GyroscopeY-axis: <span id="AGyroscope_y">0</span><span>&deg;/s</span></li>
+  <li>GyroscopeZ-axis: <span id="AGyroscope_z">0</span><span>&deg;/s</span></li>
+  <li>AccelerometerX-axis: <span id="AAccelerometer_x">0</span><span> m/s<sup>2</sup></span></li>
+  <li>AccelerometerY-axis: <span id="AAccelerometer_y">0</span><span> m/s<sup>2</sup></span></li>
+  <li>AccelerometerZ-axis: <span id="AAccelerometer_z">0</span><span> m/s<sup>2</sup></span></li>
+</ul>
+<a id="start_getpeak" class="btn2" href="#" role="button">Start record peak</a>
+  <button id="CSV3" onclick='downloadCSV3({ filename: "csv-data-Gyro.csv" });'>record and Download Gyroscopedata</button>
+  </div>
+<svg id="symbols" style="display: none">
+  <symbol id="square" viewBox="0 0 128 128">
+    <path style="fill:none;stroke-width:8px;stroke-linecap:square;" d="M35,43 l0,40 l30,0 l0,-40 l30,0 l0,40" />
+  </symbol>
+  <symbol id="sawtooth" viewBox="0 0 128 128">
+    <path style="fill:none;stroke-width:8px;stroke-linecap:square;stroke-linejoin:bevel;" d="M30,80 l30,-40 l0,40 l30,-40 l0,40" />
+  </symbol>
+  <symbol id="triangle" viewBox="0 0 128 128">
+    <path style="fill:none;stroke-width:8px;stroke-linecap:square;stroke-linejoin:bevel;" d="M30,80 l17,-40 l17,40 l17,-40 l17,40" />
+  </symbol>
+  <symbol id="sine" viewBox="0 0 128 128">
+    <path style="fill:none;stroke-width:8px;stroke-linecap:square;stroke-linejoin:bevel;" d="M30,64 q17,-40 32,0 q17,40 32,0" />
+  </symbol>
+  <symbol id="play" viewBox="0 0 128 128">
+    <path style="stroke-width:4px;stroke-linecap:square;stroke-linejoin:bevel" d="M33,30 l0,68 l68,-34z" />
+  </symbol>
+  <symbol id="pause" viewBox="0 0 128 128">
+    <rect style="stroke-width:2px;stroke-linecap:square;stroke-linejoin:bevel" x="30" y="30" width="30" height="68" />
+    <rect style="stroke-width:2px;stroke-linecap:square;stroke-linejoin:bevel;" x="68" y="30" width="30" height="68" />
+  </symbol>
+  <symbol id="codepen" viewBox="-25 -25 150 150">
+    <path d="M100 34.2c-.4-2.6-3.3-4-5.3-5.3-3.6-2.4-7.1-4.7-10.7-7.1-8.5-5.7-17.1-11.4-25.6-17.1-2-1.3-4-2.7-6-4-1.4-1-3.3-1-4.8 0-5.7 3.8-11.5 7.7-17.2 11.5L5.2 29C3 30.4.1 31.8 0 34.8c-.1 3.3 0 6.7 0 10v16c0 2.9-.6 6.3 2.1 8.1 6.4 4.4 12.9 8.6 19.4 12.9 8 5.3 16 10.7 24 16 2.2 1.5 4.4 3.1 7.1 1.3 2.3-1.5 4.5-3 6.8-4.5 8.9-5.9 17.8-11.9 26.7-17.8l9.9-6.6c.6-.4 1.3-.8 1.9-1.3 1.4-1 2-2.4 2-4.1V37.3c.1-1.1.2-2.1.1-3.1 0-.1 0 .2 0 0zM54.3 12.3L88 34.8 73 44.9 54.3 32.4V12.3zm-8.6 0v20L27.1 44.8 12 34.8l33.7-22.5zM8.6 42.8L19.3 50 8.6 57.2V42.8zm37.1 44.9L12 65.2l15-10.1 18.6 12.5v20.1zM50 60.2L34.8 50 50 39.8 65.2 50 50 60.2zm4.3 27.5v-20l18.6-12.5 15 10.1-33.6 22.4zm37.1-30.5L80.7 50l10.8-7.2-.1 14.4z"></path>
+  </symbol>
+</svg>
+
+<div id="app" class="app">
+  <header class="header">
+    <div class="header__logo"></div>
+
+  </header>
+  <nav class="menu">
+    <button class="menu__btn" @click="play" title="play">
+      <svg>
+        <use xlink:href="#play" /></svg>
+    </button>
+    <button class="menu__btn" @click="stop" title="pause">
+      <svg>
+        <use xlink:href="#pause" /></svg>
+    </button>
+    <button class="menu__btn" @click="addOscillator('sine')" title="add sine oscillator">
+      <svg>
+        <use xlink:href="#sine" /></svg>
+    </button>
+    <button class="menu__btn" @click="addOscillator('square')" title="add square oscillator">
+      <svg>
+        <use xlink:href="#square" /></svg>
+    </button>
+    <button class="menu__btn" @click="addOscillator('triangle')" title="add triangle oscillator">
+      <svg>
+        <use xlink:href="#triangle" /></svg>
+    </button>
+    <button class="menu__btn" @click="addOscillator('sawtooth')" title="add sawtooth oscillator">
+      <svg>
+        <use xlink:href="#sawtooth" /></svg>
+    </button>
+
+  </nav>
+  <fieldset class="form">
+    <legend class="form__title">Graph</legend>
+    <canvas class="form__canvas"></canvas> 
+  </fieldset>
+  <fieldset class="form">
+    <legend class="form__title">Carrier</legend>
+    <div class="form__controls">
+
+      <div class="form__group">
+        <label for="carrfreq1" class="form__label">frequency: {{carrier.freq}} Hz</label>
+        <input id="carrfreq" class="form__field1" type="range" v-model="carrier.freq" min="20000" max="25000">
+        <label class="form__label">input frequency:</label>
+        <input id="carrfreq" class="form__field2" type="text" v-model="carrier.freq_in" @keyup.enter="test">
+        
+      </div>
+
+      <div class="form__group">
+        <label class="form__label">type</label>
+        <select class="form__field" v-model="carrier.type">
+          <option value="sine">sine</option>
+          <option value="square">square</option>
+          <option value="triangle">triangle</option>
+          <option value="sawtooth">sawtooth</option>
+        </select>
+      </div>
+
+      <div class="form__group">
+        <label for="carrfreq" class="form__label">gain: {{carrier.gain.toFixed(2)}}</label>
+        <input id="carrgain" class="form__field" type="range" v-model="carrier.gain" min="0.0" max="1.0" step="0.01">
+      </div>
+
+    </div>
+  </fieldset>
+  <fieldset class="form" v-for="(mod, idx) in mods">
+    <legend class="form__title">Modulator {{idx+1}}</legend>
+    <button class="form__close" @click="removeOscillator(idx)" aria-label="remove"> x </button>
+    <div class="form__controls">
+      <div class="form__group">
+        <label class="form__label">type</label>
+        <select class="form__field" v-model="mod.type">
+          <option value="sine">sine</option>
+          <option value="square">square</option>
+          <option value="triangle">triangle</option>
+          <option value="sawtooth">sawtooth</option>
+        </select>
+      </div>
+      <div class="form__group">
+        <label :for="'modfreq'+(idx+1)"class="form__labe1">frequency: {{mod.freq}} Hz</label>
+        <input id="'modfreq'+(idx+1)" class="form__field" v-model="mod.freq" type="range" min="1" max="25000">
+      </div>
+      <div class="form__group">
+        <label :for="'modgain'+(idx+1)" class="form__label">gain: {{mod.gain}}</label>
+        <input :id="'modgain'+(idx+1)" class="form__field" v-model="mod.gain" type="range" min="1" max="1000">
+      </div>
+    </div>
+  </fieldset>
+  <fieldset class="form">
+    Sweep:  
+    <button id="1-16k" name="1-16k" onclick="Sweep_handle16()"> 1-16k </button>
+    <button id="16-24k" name="16-24k" onclick="Sweep_handle24()"> 16-24k </button>
+    <button id="16-24k" name="16-24k" onclick="Sweep_stophandle()"> stop </button>
+       <span id="demo"></span>Hz           
+    <label for="SweepTime" class="form__label">Running time: {{Sweep_Timer_Minute}}:{{Sweep_Timer_Second}}.{{Sweep_Timer_miniSecond}}</label>
+    <button id="recordtable" name="recordtable" onclick="recordtable()"> recordtable1 </button>
+    <button id="CSV1" onclick='downloadCSV({ filename: "csv-data0-16000.csv" });'>Download CSV1</button>
+    <div id="test" style="text-align:left"></div>
+    <br/><br/><button id="recordtable2" name="recordtable2" onclick="recordtable2()"> recordtable2 </button>
+    <button id="CSV2" onclick='downloadCSV2({ filename: "csv-data16000-24000.csv" });'>Download CSV2</button>
+    <div id="test2" style="text-align:left"></div>
+   <div id="Sweep" class="Sweep">
+        <label for="SweepTime" class="form__label">Sweeping Time to wait: {{SweepTime}} mS</label>
+        <input id="SweepTime" class="form__field1" type="range"  v-model="SweepTime"  min="1" max="3000">
+        <label class="form__label">input Sweep Time:</label>
+        <input id="SweepTime_input" class="form__field2" type="text"  v-model="SweepTime_in" @keyup.enter="Sweep_test()">
+      </fieldset>  
+     <fieldset class="form">
+     <label for="SweepStepinc" class="form__label"> 1-16k SweepStep : {{SweepStep_inc}} Hz  </label>
+    <label for="SweepStepinc24" class="form__label">16-24k SweepStep : {{SweepStep_inc24}} Hz </label>
+       <input id="SweepStepinc" class="form__field1" type="range"  v-model="SweepStep_inc"  min="1" max="300" onclick="SweepStep_click()" >
+    
+        <label class="form__label">input SweepStep:</label>
+        <input id="SweepStepinc_input" class="form__field2" type="text"  v-model="SweepStep_inc_in" @keyup.enter="SweepStep_test()">
+        
+      </div>
+<script>
+
+   </script>
+    
+  </fieldset>  
+</div>
+<template class="pen__html" type="text/plain">
+  <button id="play"> play </button>
+  <button id="stop"> stop </button>
+</template>
+<template class="pen__js" type="text/plain">
+  const playButton = document.getElementById('play')
+  const stopButton = document.getElementById('stop')
+
+  const AC = new AudioContext()
+  const masterVolume = AC.createGain()
+  masterVolume.gain.value = 0.0
+  masterVolume.connect(AC.destination)
+
+  const createAudioNode = ({type = 'sine', freq = 440, gain = 1.0} = {}) => {
+  const osc = AC.createOscillator()
+  osc.frequency.value = freq
+  osc.type = type
+  const _gain = AC.createGain()
+  _gain.gain.value = gain
+  osc.connect(_gain)
+  return { osc, gain: _gain }
+  }
+  const carrier = createAudioNode(%%CARRIER%%)
+  const modulators = [%%MODULATORS%%].map(m => createAudioNode(m))
+  const startSound = () => {
+  if (modulators.length > 0) {
+  modulators[0].gain.connect(carrier.osc.frequency)
+  modulators.reduce((a, b) => {
+  b.gain.connect(a.gain.gain)
+  return b
+  })
+  modulators.map(m => m.osc.start())
+  }
+  carrier.osc.start()
+  carrier.gain.connect(masterVolume)
+  }
+  startSound()
+
+  const discardSound = () => {
+  modulators.map(m => {
+  m.gain.disconnect()
+  m.osc.stop()
+  })
+  carrier.osc.disconnect()
+  carrier.osc.stop()
+  }
+
+  playButton.addEventListener('click', () => {
+  if (AC.state === "suspended") {
+  AC.resume()
+  }
+  if (masterVolume.gain.value === 0.0) {
+  masterVolume.gain.setValueAtTime(0.01, AC.currentTime)
+  }
+  masterVolume.gain.exponentialRampToValueAtTime(1.0, AC.currentTime + 1)
+  })
+
+  stopButton.addEventListener('click', () => {
+  masterVolume.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 1)
+  })
+</template>
+
